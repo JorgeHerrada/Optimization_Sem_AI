@@ -21,10 +21,11 @@ elseif f_selected == 2
     xu = [2 2]';    % upper value for x,y coordinates
 end
 
-Generations = 100;     % # of iterations/generations
+Generations = 100;      % # of iterations/generations
 Dimension = 2;          % Dimension
-N_individuals = 50;      % # of solutions/individuals per iteration
-pMutation = 0.1;       % Mutation Probability
+N_individuals = 50;     % # of solutions/individuals per iteration
+Elite = 10;              % # number of patents in the elite that wont mutate
+pMutation = 0.1;        % Mutation Probability
 
 % create a matrix that will contain each individual(as a column vector)
 individuals = zeros(Dimension,N_individuals); 
@@ -39,11 +40,8 @@ for i=1:N_individuals
     
     % assign random value on x,y within xl,xu range
     individuals(:,i) = xl+(xu-xl).*rand(Dimension,1);
-    
+   
 end
-
-% Just for testing
-% Plot_Contour(f,individuals,xl,xu);
 
 for g=1:Generations
 
@@ -64,13 +62,13 @@ for g=1:Generations
 
     % save best individual for plotting
     f_plot(g) = min(fitness);
-
+ 
     % *********************Selection**************************
     
     % Matrix that will contain children after selection/crossover/mutation
-    children = zeros(Dimension,N_individuals);
+    children = zeros(Dimension,N_individuals - Elite);
 
-    for i=1:2:N_individuals
+    for i=1:2:N_individuals - Elite
         % custom aptitude values just for debugginng purposes
         % aptitude = [10 100 5 10 6 50];
         
@@ -108,7 +106,7 @@ for g=1:Generations
     % *********************Mutation**************************
 
     % Iterate each value(dimension) of each individual and randomly mutate
-    for i=1:N_individuals
+    for i=1:N_individuals - Elite
         for j=1:Dimension
             
             % pMutation determines if current value of individual mutates
@@ -118,8 +116,16 @@ for g=1:Generations
         end
     end
     
+    % ********************Choose Elite**********************
+
+    % sort aptitudes and save the descend indexes
+    [~,Indexes] = sort(aptitude,'descend');
+
+    % get value elite indexes (based on best aptitude)
+    valueElite = individuals(:,Indexes(1:Elite));
+
     % individuals die and children become new individuals
-    individuals = children;
+    individuals = [children valueElite];
 
 end
 
