@@ -25,7 +25,7 @@ Generations = 100;      % # of iterations/generations
 Dimension = 2;          % Dimension
 N_individuals = 50;     % # of solutions/individuals per iteration
 Elite = 10;              % # number of patents in the elite that wont mutate
-pMutation = 0.1;        % Mutation Probability
+pMutation = 0.01;        % Mutation Probability
 
 % create a matrix that will contain each individual(as a column vector)
 individuals = zeros(Dimension,N_individuals); 
@@ -73,12 +73,16 @@ for g=1:Generations
         % aptitude = [10 100 5 10 6 50];
         
         % Get 1st parent index from Roullete
-        p1 = Roulette(aptitude);
+%         p1 = Roulette(aptitude);
+%         p1 = Ranking(aptitude);
+        p1 = Torneo(aptitude);
         
         % Get 2nd parent index that MUST be different from the 1st one
         p2 = p1; 
         while p1 == p2
-           p2 = Roulette(aptitude); 
+%            p2 = Roulette(aptitude); 
+%            p2 = Ranking(aptitude); 
+            p2 = Torneo(aptitude); 
         end
         
         % get parents coordinates/values for crossover
@@ -111,7 +115,11 @@ for g=1:Generations
             
             % pMutation determines if current value of individual mutates
             if rand() < pMutation
-                children(j,i) = xl(j)+(xu(j)-xl(j))*rand();
+                %***1st option for mutation***
+%                 children(j,i) = xl(j)+(xu(j)-xl(j))*rand();
+
+                %***2nd option for mutation***
+                children(j,i) = children(j,i) + normrnd(0,1);
             end
         end
     end
