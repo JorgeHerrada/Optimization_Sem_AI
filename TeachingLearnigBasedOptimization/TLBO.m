@@ -11,7 +11,7 @@ plotting = 1; % need the plots? Yes(1), No(0)
 % 2 uses Rastrigin
 % 3 uses Drop-Waive
 % Select function :
-f_selected = 1; 
+f_selected = 4; 
 
 xl = [-5 -5]';  % lower value for x,y coordinates
 xu = [5 5]';    % upper value for x,y coordinates
