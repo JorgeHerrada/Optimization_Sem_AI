@@ -94,9 +94,12 @@ for g=1:G
             y = x(:,i) + rand()*(x(:,j)-x(:,k));
         end
 
+        % evaluamos nueva solucion generada
         fy = f(y(1),y(2));
 
+        % es mejor que la existente?
         if fy<fitness(i)
+            % actualizamos
             x(:,i) = y;
             fitness(i) = fy;
         end
