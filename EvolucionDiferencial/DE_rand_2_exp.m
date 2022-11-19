@@ -12,8 +12,12 @@ plotting = 1; % need the plots? Yes(1), No(0)
 % 2 uses Rastrigin
 % 3 uses Drop-Waive
 % Select function :
-f_selected = 1; 
+f_selected = 4; 
 
+xl = [-5 -5]';  % lower value for x,y coordinates
+xu = [5 5]';    % upper value for x,y coordinates
+
+% Select Function to optimize
 if f_selected == 1
     % Griewank Function
     f = @(x,y) ((x.^2/400) + (y.^2/4000)) - (cos(x).*cos(y/sqrt(2))) + 1; 
@@ -23,10 +27,14 @@ elseif f_selected == 2
 elseif f_selected == 3
     % Drop-Wave function
     f = @(x,y) -((1+cos(12*sqrt(x.^2+y.^2)))./(0.5*(x.^2+y.^2)+2)); 
+elseif f_selected == 4
+    % Mccormick function
+    f = @(x,y) sin(x+y)+(x-y).^2-1.5*x+2.5*y+1;
+    % define su propio dominio
+    xl = [-1.5 -3]';  % lower value for x,y coordinates
+    xu = [4 4]';    % upper value for x,y coordinates
 end
 
-xl = [-5 -5]';  % lower value for x,y coordinates
-xu = [5 5]';    % upper value for x,y coordinates
 
 % definicion de parametros iniciales
 
