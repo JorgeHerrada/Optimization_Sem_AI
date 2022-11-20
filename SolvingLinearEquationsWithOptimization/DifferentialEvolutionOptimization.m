@@ -6,45 +6,46 @@
 clear all
 close all
 clc
-plotting = 1; % need the plots? Yes(1), No(0)
+plotting = 0; % need the plots? Yes(1), No(0)
 
-% 1 uses Griewank
-% 2 uses Rastrigin
-% 3 uses Drop-Waive
-% Select function :
-f_selected = 4; 
+% definicion del sistemas de ecuaciones
+opc = 3;
 
-xl = [-5 -5]';  % lower value for x,y coordinates
-xu = [5 5]';    % upper value for x,y coordinates
-
-% Select Function to optimize
-if f_selected == 1
-    % Griewank Function
-    f = @(x,y) ((x.^2/400) + (y.^2/4000)) - (cos(x).*cos(y/sqrt(2))) + 1; 
-elseif f_selected == 2
-    % Rastrigin Function
-    f = @(x,y) 10*2 + (x.^2 - 10*cos(2*pi*x)) + (y.^2 - 10*cos(2*pi*y));
-elseif f_selected == 3
-    % Drop-Wave function
-    f = @(x,y) -((1+cos(12*sqrt(x.^2+y.^2)))./(0.5*(x.^2+y.^2)+2)); 
-elseif f_selected == 4
-    % Mccormick function
-    f = @(x,y) sin(x+y)+(x-y).^2-1.5*x+2.5*y+1;
-    % define su propio dominio
-    xl = [-1.5 -3]';  % lower value for x,y coordinates
-    xu = [4 4]';    % upper value for x,y coordinates
+if opc == 1
+    A = [2 3; 5 1]; % matriz de escalares
+    b = [7;11];     % vector de resultado
+    m = numel(b);   % dimension
+    xl = [-5 -5]';  % lower value for x,y coordinates
+    xu = [5 5]';    % upper value for x,y coordinates
+elseif opc == 2
+    A = [2 3 4; 1 2 3; 5 1 0; 3 4 1]; % matriz de escalares
+    b = [19;13;11;13];     % vector de resultado
+    m = numel(b);   % dimension
+    xl = [-5 -5 -5]';  % lower value for x,y coordinates
+    xu = [5 5 5]';    % upper value for x,y coordinates
+elseif opc == 3
+    A = [2 3; 5 4; 2 5; 4 1; 0.5 0.5]; % matriz de escalares
+    b = [-5;5;-15;15;0];     % vector de resultado
+    m = numel(b);   % dimension
+    xl = [-5 -5]';  % lower value for x,y coordinates
+    xu = [5 5]';    % upper value for x,y coordinates
+elseif opc == 4
+    A = [2 3; 5 1]; % matriz de escalares
+    b = [7;11];     % vector de resultado
+    m = numel(b);   % dimension
 end
+
+% Function objetivo basada en el error
+f = @(x) (1/(2*m))*sum((b - A*x).^2);
 
 % Funciones de penalizacion
 % fp = @(x,xl,xu) f(x(1),x(2)) + 1000*Penalty1(x,xl,xu);
-fp = @(x,xl,xu) f(x(1),x(2)) + 1000*Penalty2(x,xl,xu);
-
-
+% fp = @(x,xl,xu) f(x(1),x(2)) + 1000*Penalty2(x,xl,xu);
 
 % definicion de parametros iniciales
 
 G = 150;      % # of iterations/generations
-D = 2;          % Dimension
+[~,D] = size(A);          % Dimension
 N = 50;         % # individuos / particulas
 
 % mejor valor por iteración para grafica de convergencia
@@ -62,7 +63,7 @@ CR = 0.9;   % 0.9, 0.6 - Constante de recombinacion
 for i=1:N
     x(:,i) = xl+(xu-xl).*rand(D,1);
 
-    fitness(i) = fp(x(:,i),xl,xu);
+    fitness(i) = f(x(:,i));
 end
 
 
@@ -100,7 +101,7 @@ for g=1:G
 
         % ************Seleccion*******************
         % Calculamos fitness del individuo mutado
-        fu = fp(u,xl,xu);
+        fu = f(u);
 
         % Mutacion es mejor que posicion actual?
         if fu<fitness(i)
@@ -115,7 +116,7 @@ for g=1:G
     
 
     % plot de toda la poblacion de la generacion
-    Plot_Contour(f,x,xl,xu);
+%     Plot_Contour(f,x,xl,xu);
     % guarda indice del mejor valor de la generacion
     [~,xb] = min(fitness);
     f_plot(g) = fitness(xb);
@@ -126,10 +127,9 @@ end
 
 %  *****************Display results************************
 
-display(['x = ' num2str(x(1,xb))]);
-display(['y = ' num2str(x(2,xb))]);
-display(['fx = ' num2str(fitness(xb))]);
-
+x(:,xb)     % mejor valor para x1,x2,...,xn
+f(x(:,xb))  % error
+A*x(:,xb)   % comprobacion de resultado
 
 %*******************Plotting*******************************
 if plotting
