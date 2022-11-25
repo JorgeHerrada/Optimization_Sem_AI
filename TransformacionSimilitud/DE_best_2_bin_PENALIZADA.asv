@@ -29,12 +29,13 @@ X1 = P(1,:)';
 X2 = P(2,:)';
 X3 = P(3,:)';
 
+% puntos extremos de imagen a desplazar
+x1 = [1 n]';
+x2 = [1 1]';
+x3 = [m 1]';
+
 xl = [1; 1; -pi; 0];  % lower value for x,y coordinates
-xu = [N; M;  pi; 0];    % upper value for x,y coordinates
-
-
-
-return 
+xu = [N; M;  pi; 10];    % upper value for x,y coordinates
 
 % Funciones de penalizacion
 % fp = @(x,xl,xu) f(x(1),x(2)) + 1000*Penalty1(x,xl,xu);
@@ -43,7 +44,7 @@ fp = @(x,xl,xu) f(x(1),x(2)) + 1000*Penalty2(x,xl,xu);
 % definicion de parametros iniciales
 
 G = 150;      % # of iterations/generations
-D = numel(xl);          % Dimension
+D = 4;          % Dimension
 N = 50;         % # individuos / particulas
 
 % mejor valor por iteración para grafica de convergencia
@@ -61,9 +62,26 @@ CR = 0.9;   % 0.9, 0.6 - Constante de recombinacion
 for i=1:N
     x(:,i) = xl+(xu-xl).*rand(D,1);
 
-    fitness(i) = fp(x(:,i),xl,xu);
-end
+    % posicion de individuo
+    q = x(:,i);
+    
+    % aplicamos transformacion de similitud a cada punto de la imagen
+    % dada su posocion actual
+    xp1 = Transformacion_Similitud(q,x1);
+    xp2 = Transformacion_Similitud(q,x2);
+    xp3 = Transformacion_Similitud(q,x3);
+    
+    % calculamos distancia entre el error basado en distancia entre 
+    % X (puntos de referencia) y xp (puntos transformados)
+    e1 = Distancia_Euclidiana(X1,xp1);
+    e2 = Distancia_Euclidiana(X2,xp2);
+    e3 = Distancia_Euclidiana(X3,xp3);
+    
+    % definicion de funcion objetivo
+    f = (1/6)*(e1^2+e2^2+e3^2);
 
+    fitness(i) = f;
+end
 
 for g=1:G
 
@@ -98,9 +116,28 @@ for g=1:G
         end
 
         % ************Seleccion*******************
-        % Calculamos fitness del individuo mutado
-        fu = fp(u,xl,xu);
 
+
+        % posicion de individuo
+        q = u;
+        
+        % aplicamos transformacion de similitud a cada punto de la imagen
+        % dada su posocion actual
+        xp1 = Transformacion_Similitud(q,x1);
+        xp2 = Transformacion_Similitud(q,x2);
+        xp3 = Transformacion_Similitud(q,x3);
+        
+        % calculamos distancia entre el error basado en distancia entre 
+        % X (puntos de referencia) y xp (puntos transformados)
+        e1 = Distancia_Euclidiana(X1,xp1);
+        e2 = Distancia_Euclidiana(X2,xp2);
+        e3 = Distancia_Euclidiana(X3,xp3);
+        
+        % definicion de funcion objetivo
+        f = (1/6)*(e1^2+e2^2+e3^2);
+    
+        fu = f + 100000;
+  
         % Mutacion es mejor que posicion actual?
         if fu<fitness(i)
             % guardamos mejor posicion y fitness
@@ -110,17 +147,18 @@ for g=1:G
 
     end
 
-    
-    
 
     % plot de toda la poblacion de la generacion
-    Plot_Contour(f,x,xl,xu);
+%     Plot_Contour(f,x,xl,xu);
     % guarda indice del mejor valor de la generacion
     [~,xb] = min(fitness);
     f_plot(g) = fitness(xb);
 end
 
+fitness(xb)
+x(:,xb)
 
+return
 
 
 %  *****************Display results************************
@@ -145,7 +183,7 @@ if plotting
     ylabel("f(x)")
 end
 
-%% Funcion de penalizacion 2 con exponentes
+%% Funcion de penalizacion con exponentes
 function z = Penalty2(x,xl,xu)
     z = 0;
     D = numel(xl);
@@ -169,21 +207,42 @@ end
 
 
 
-%% Funcion de penalizacion 1 con suma
-function z = Penalty1(x,xl,xu)
-    z = 0;
-    D = numel(xl);
+%% Funciones para transformacion
+function xp = Transformacion_Similitud (qi,xi)
+    dx = qi(1);
+    dy = qi(2);
+    theta = qi(3);
+    s = qi(4);
     
-    for j=1:D
-        
-        if xl(j)<x(j) && x(j)<xu(j)
-            z = z + 0;
-        else
-            z = z + 1;
-        end
-    end
-
+    xp = [s*cos(theta) -s*sin(theta); s*sin(theta) s*cos(theta)]*xi + [dx dy]';
 end
+
+function e = Distancia_Euclidiana (X,x)
+    e = sqrt((X(1)-x(1))^2+(X(2)-x(2))^2);
+end
+
+function Imprimir_Imagenes (q,img_des,img_ref)
+    dx = q(1);
+    dy = q(2);
+    theta = q(3);
+    s = q(4);
+    
+    T = [s*cos(theta) -s*sin(theta) dx; s*sin(theta) s*cos(theta) dy; 0 0 1];
+    Tp = projective2d(T');
+    
+    [N,M,~] = size(img_ref);
+    [n,m,~] = size(img_des);
+
+    panoramaView = imref2d([N M]);
+    Iwarp = imwarp(img_des,Tp,'OutputView',panoramaView);
+    Imask = imwarp(true(n,m),Tp,'OutputView',panoramaView);
+    
+    blender = vision.AlphaBlender('Operation','Binary mask','MaskSource','Input port');
+    panorama = step(blender,img_ref,Iwarp,Imask);
+    
+    imshow(panorama)
+end
+
 
 
 

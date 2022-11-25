@@ -16,7 +16,7 @@ f_selected = 4;
 
 
 % Cargar imagen de qr e imagen a desplazar
-img_ref = imread("ref_1.png");
+img_ref = imread("ref_2.png");
 [~,~,P] = readBarcode(img_ref,"QR-CODE");
 [N,M,~] = size(img_ref); % obtener tamaño de imagen
 
@@ -83,8 +83,6 @@ for i=1:N
     fitness(i) = f;
 end
 
-return
-
 for g=1:G
 
     for i=1:N
@@ -118,9 +116,28 @@ for g=1:G
         end
 
         % ************Seleccion*******************
-        % Calculamos fitness del individuo mutado
-        fu = fp(u,xl,xu);
 
+
+        % posicion de individuo
+        q = u;
+        
+        % aplicamos transformacion de similitud a cada punto de la imagen
+        % dada su posocion actual
+        xp1 = Transformacion_Similitud(q,x1);
+        xp2 = Transformacion_Similitud(q,x2);
+        xp3 = Transformacion_Similitud(q,x3);
+        
+        % calculamos distancia entre el error basado en distancia entre 
+        % X (puntos de referencia) y xp (puntos transformados)
+        e1 = Distancia_Euclidiana(X1,xp1);
+        e2 = Distancia_Euclidiana(X2,xp2);
+        e3 = Distancia_Euclidiana(X3,xp3);
+        
+        % definicion de funcion objetivo
+        f = (1/6)*(e1^2+e2^2+e3^2);
+    
+        fu = f + 10000*Penalty2(u,xl,xu);
+  
         % Mutacion es mejor que posicion actual?
         if fu<fitness(i)
             % guardamos mejor posicion y fitness
@@ -130,8 +147,6 @@ for g=1:G
 
     end
 
-    
-    
 
     % plot de toda la poblacion de la generacion
 %     Plot_Contour(f,x,xl,xu);
@@ -140,7 +155,12 @@ for g=1:G
     f_plot(g) = fitness(xb);
 end
 
+fitness(xb)
+q = x(:,xb)
 
+Imprimir_Imagenes(q,img_des,img_ref)
+
+return
 
 
 %  *****************Display results************************
