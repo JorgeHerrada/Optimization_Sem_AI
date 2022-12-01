@@ -6,21 +6,19 @@
 clear all
 close all
 clc
-plotting = 1; % need the plots? Yes(1), No(0)
+plotting = 0; % need the plots? Yes(1), No(0)
 
-% 1 uses Griewank
-% 2 uses Rastrigin
-% 3 uses Drop-Waive
-% Select function :
-f_selected = 4; 
+% Cargar imagen de qr 
+% img_ref = imread("barranca2.jpg");
+% img_ref = imread("graduacion1.jpg");
+img_ref = imread("moto-rata1.jpg");
 
-
-% Cargar imagen de qr e imagen a desplazar
-img_ref = imread("ref_2.png");
-[~,~,P] = readBarcode(img_ref,"QR-CODE");
+% identifica QR y guarda puntos de referencia
+[~,~,P] = readBarcode(img_ref,"QR-CODE"); 
 [N,M,~] = size(img_ref); % obtener tamaño de imagen
 
-img_des = imread('des.png');
+% Carga imagen a desplazar/escalar/rotar
+img_des = imread('Jorge.png');
 [n,m,~] = size(img_des); % obtener tamaño de imagen
 
 
