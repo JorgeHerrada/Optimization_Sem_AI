@@ -6,10 +6,13 @@
 clear all
 close all
 clc
-plotting = 0; % need the plots? Yes(1), No(0)
+plotting = 1; % need the plots? Yes(1), No(0)
 
 % Punto destino 
-pd = [-0.6; -0.4];
+pd = [-0.5; -0.5];
+% pd = [0.5; 0.5];
+% pd = [-0.5; 0.5];
+% pd = [0.5; -0.5];
 
 % define longitud de brazos
 a_1 = 0.35;
@@ -32,9 +35,9 @@ fp = @(x,xl,xu) f(x) + 1000*Penalty2(x,xl,xu);
 
 % definicion de parametros iniciales
 
-G = 50;      % # of iterations/generations
+G = 100;      % # of iterations/generations
 D = 3;          % Dimension
-N = 10;         % # individuos / particulas
+N = 30;         % # individuos / particulas
 
 % mejor valor por iteración para grafica de convergencia
 f_plot = zeros(1,G);  
@@ -125,6 +128,7 @@ end
 %  *****************Display results************************
 x(:,xb)
 fitness(xb)
+p(x(1,xb),x(2,xb),x(3,xb))
 figure
 Dibujar_Manipulador(x(:,xb))
 plot(pd(1),pd(2),'go','LineWidth',2,'MarkerSize',10)
